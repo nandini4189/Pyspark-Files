@@ -1,0 +1,22 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from decimal import Decimal
+appName = "Python Example - PySpark Read XML"
+master = "local"
+
+# Create Spark session
+spark = SparkSession.builder \
+    .appName(appName) \
+    .master(master) \
+    .getOrCreate()
+
+schema = StructType([
+    StructField('_id', IntegerType(), False),
+    StructField('rid', IntegerType(), False),
+    StructField('name', StringType(), False)
+])
+
+df = spark.read.format("com.databricks.spark.xml") \
+    .option("rowTag","record").load("file:///home/tangr/python-examples/test.xml", schema=schema)
+
+df.show()

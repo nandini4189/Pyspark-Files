@@ -1,0 +1,172 @@
+Name--HR_comma_sep
+
+Owner--postgres
+
+schema--power_bi
+
+
+
+satisfaction_level--integer
+
+last_evaluation ---integer
+
+number_project --integer
+
+average_montly_hours--integer
+
+time_spend_company--integer
+
+Work_accident--integer
+
+left--integer
+
+promotion_last_5years--integer
+
+Departments--integer
+
+salary--integer
+
+predictions--integer
+
+probability of leaving--integer
+
+
+
+
+
+
+
+#Load in the dependencies
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+import sys
+import psycopg2
+from sqlalchemy import create_engine
+
+if len(sys.argv)<1:
+    print("Please provide database name and schema name")
+    sys.exit(1)
+
+print(sys.argv)
+
+database=sys.argv[1]
+host=sys.argv[2]
+user=sys.argv[3]
+password=sys.argv[4]
+
+try:
+    conn_table=psycopg2.connect(dbname=database,host=host,user=user,password=password)
+    conn_target.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    print('target connected successfully')
+except Exception as e:
+    print('cannot find the target')
+
+cur_target=conn_target.cursor()
+
+cur_target.execute("SELECT EXISTS (SELECT 1 AS result FROM hr_comma_sep WHERE schemaname = 'public' AND tablename = 'hr_comma_sep');")
+tableExists = cur_target.fetchone()[0]
+
+for row in rows:
+    cur_target.execute("""insert into  public.hr_comma_sep(satisfaction_level,
+        last_evaluation,
+        number_project,
+        average_montly_hours,
+        time_spend_company,
+        Work_accident,
+        target,
+        promotion_last_5years,
+        Departments,
+        salary,
+        predictions,
+        probability of leaving
+        
+)
+                    values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", row)
+cur_target.execute("select count(*) from public.hr_comma_sep")
+result = cur_target.fetchone()
+print("Source Rows:", result[0])
+conn_target.commit()
+conn_target.close()
+
+
+
+
+dataset = pd.read_csv(r'C:\Users\pumadevi\Desktop\Power BI\HR_comma_sep.csv')
+dataset.head()
+
+#lets change categories to numbers
+le = LabelEncoder()
+dataset['Departments'] = le.fit_transform(dataset['Departments'])
+dataset['salary'] = le.fit_transform(dataset['salary'])
+#preprocess your data
+y=dataset['left']
+features = ['satisfaction_level', 'last_evaluation', 'number_project',
+'average_montly_hours', 'time_spend_company', 'Work_accident',
+'promotion_last_5years', 'Departments', 'salary']
+X=dataset[features]
+#lets scale the data
+s = StandardScaler()
+X = s.fit_transform(X)
+
+#split and train the dataset
+X_train,X_test,y_train,y_test = train_test_split(X,y)
+
+#Let the model predict results
+log = LogisticRegression()
+log.fit(X_train,y_train)
+y_pred = log.predict(X)
+y_prob = log.predict_proba(X)
+
+# Lets add the columns back to the dataframe
+dataset['predictions'] = y_pred
+dataset['probability of leaving'] = y_prob[:,1]
+
+
+
+
+
+
+
+
+import psycopg2
+conn = psycopg2.connect(database = "xamplify",
+			user = "postgres",
+			password = "gjCj7fmExT6kq5j4",
+			host = "138.68.44.49",
+			port = "5432")
+cur = conn.cursor()
+cur.execute("insert into hr_comma_sep(satisfaction_level,
+        last_evaluation,
+        number_project,
+        average_montly_hours,
+        time_spend_company,
+        Work_accident,
+        target,
+        promotion_last_5years,
+        Departments,
+        salary,
+        predictions,
+        probability of leaving) values(0.30,050,3,125,3,0,2,3,4,1,0.40)")
+conn.commit()
+cur.execute("select * from hr_comma_sep")
+rows = cur.fetchall()
+
+for row in rows:
+	print("satisfaction_level" :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
